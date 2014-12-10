@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <!-- [START head_html] -->
+  <head>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+  </head>
+  <!-- [END head_html] -->
+  <body>
+   
+    {% for question in questions %}
+      {% set id= question.key.id() %}
+      {% if question.author %}
+        <b>{{ question.author.nickname() }}</b> ask:
+      {% else %}
+        An anonymous person wrote:
+      {% endif %}
+      <p>question_id = {{ id }}</p>
+      
+      <a href="answer?question_id={{ id }}">{{question.title}}</a>
+      <br>
+      <hr>
+    {% endfor %}
+      
+    <form action="/add" method="post">
+      <div><p>Title &nbsp;&nbsp;&nbsp;&nbsp;<textarea name="title" rows="1" cols="60"></textarea></p></div>
+      <div>Content<textarea name="content" rows="3" cols="60"></textarea></div>
+      <div><input type="submit" value="Submmit Question"></div>
+    </form>
+
+   
+
+    <a href="{{ url|safe }}">{{ url_linktext }}</a>
+
+  </body>
+</html>
+{% endautoescape %}
