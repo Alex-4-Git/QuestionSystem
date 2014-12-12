@@ -7,11 +7,13 @@
   </head>
   <!-- [END head_html] -->
   <body>
+    <div> <p>Hello {{current_user.nickname()}}</p> </div>
+    <br>
     <a href="{{ url|safe }}">{{ url_linktext }}</a>
     <br>
     <form action="/add" method="post">
-      <div><p>I want to ask</p> <textarea name="title" rows="1" cols="60"></textarea></div>
-      <div><p>Content</p><textarea name="content" rows="3" cols="60"></textarea></div>
+      <div><p>I want to ask</p> <textarea name="title" required rows="1" cols="60"></textarea></div>
+      <div><p>Content</p><textarea name="content" required rows="3" cols="60"></textarea></div>
       <div><input type="submit" value="Submmit Question"></div>
     </form>
     <br>
@@ -36,8 +38,11 @@
       <br>
       <hr>
     {% endfor %}
-      
-    
+    {% if next_page_url %}
+    <a href="{{next_page_url}}"> Next Page</a>
+    {% endif %}
+    <br>
+    <a href="/">Go Back To Main Page</a>
 
   </body>
 </html>

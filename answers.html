@@ -8,9 +8,20 @@
   <!-- [END head_html] -->
   <body>
     {% set id= question.key.id() %}
+    <div> <p>Hello {{current_user.nickname()}}</p> </div>
+    <br>
     <div>
-      <p><b>Question Content: </b></p>
+      <p><b>{{question.title}}: </b></p>
       <p>{{question.content}}</p>
+      {% if (current_user == question.author) %}
+      <form action="/add?question_id={{id}}" method=post>
+      <div>
+        <textarea name="content" required rows="3" cols="60"></textarea><br>
+        <input type=submit value="Edit this question">
+      </div>
+      </form>
+      {% endif %}
+
       <form action="/vote?question_id={{ id }}" method="post">
           <div>
             <input type=submit name="name" value="up">&nbsp;{{question.up}}&nbsp;&nbsp;&nbsp;&nbsp;
@@ -24,6 +35,15 @@
       {% for answer in answers %}
         <b>{{ answer.author.nickname() }}</b> answered:
         <p>{{answer.content}}</p>
+
+        {% if (current_user == answer.author) %}
+          <form action="/addA?question_id={{id}}&answer_id={{ answer.key.id() }}" method=post>
+          <div>
+            <textarea name="content" required rows="3" cols="60"></textarea><br>
+            <input type=submit value="Edit this answer">
+          </div>
+          </form>
+        {% endif %}
         
         <form action="/vote?question_id={{ id }}&answer_id={{ answer.key.id() }}" method="post">
           <div>
@@ -35,7 +55,7 @@
       {% endfor %}
       
     <form action="/addA?question_id={{ id }}" method="post">
-      <div><p>Your Answer</p><textarea name="content" rows="3" cols="60"></textarea></div>
+      <div><p>Your Answer</p><textarea name="content" required rows="3" cols="60"></textarea></div>
       <div><input type="submit" value="Submmit Answer"></div>
     </form>
     <br>

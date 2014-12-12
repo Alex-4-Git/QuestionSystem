@@ -6,6 +6,7 @@ import time
 from Model import *
 from google.appengine.api import users
 from google.appengine.ext import ndb
+from google.appengine.datastore.datastore_query import Cursor
 
 import jinja2
 import webapp2
@@ -34,20 +35,33 @@ def question_key(question_name,author,date):
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
-
         if users.get_current_user():
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
         else:
             url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
-        question_query=Question.query().order(-Question.margin)
-        questions = question_query.fetch()
+        #every page display 2 quesions
+        pagesize=2
+        curs=Cursor(urlsafe=self.request.get('cursor'))
+        if curs:
+            questions,next_curs,more = Question.query().order(-Question.margin).fetch_page(pagesize,start_cursor=curs)
+        else:
+            questions,next_curs,more = Question.query().order(-Question.margin).fetch_page(pagesize)
+        if more and next_curs:
+            next_page_url="/?cursor=%s"%next_curs.urlsafe()
+        else: next_page_url=""
+
+        # question_query=Question.query().order(-Question.margin)
+
+        # questions = question_query.fetch()
 
         template_values = {
+            'current_user':users.get_current_user(),
             'questions': questions,
             'url': url,
             'url_linktext': url_linktext,
+            'next_page_url':next_page_url
         }
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -63,16 +77,21 @@ class AddQuestion(webapp2.RequestHandler):
            self.redirect(url)
            return
 
-        question = Question()
+        question_id=self.request.get("question_id")
+        if question_id:
+            question_key=ndb.Key(Question,int(question_id))
+            question=question_key.get()
+            question.content=self.request.get('content')
+            question.put()
 
-        if users.get_current_user():
+        else:
+            question = Question()
             question.author = users.get_current_user()
+            question.content = self.request.get('content')
+            question.title = self.request.get('title')
+            question.put()
 
-        question.content = self.request.get('content')
-        question.title = self.request.get('title')
-        question.put()
         time.sleep(0.1)
- 
         self.redirect('/')
 
     def get(self):
@@ -94,6 +113,7 @@ class listAnswer(webapp2.RequestHandler):
         template_values = {
             'question': question,
             'answers': answers,
+            'current_user':users.get_current_user()
         }
 
         template = JINJA_ENVIRONMENT.get_template('answers.html')
@@ -109,11 +129,19 @@ class AddAnswer(webapp2.RequestHandler):
 
         question_id=self.request.get('question_id')
         question_key = ndb.Key('Question', int(question_id))
+        answer_id=self.request.get('answer_id')
+        #edit an existing answer
+        if answer_id:
+            answer_key = ndb.Key(Question,int(question_id),Answer,int(answer_id))
+            answer=answer_key.get()
+            answer.content=self.request.get('content')
+
 
         #initiallize instance answer
-        answer = Answer(parent=question_key)
-        answer.author = users.get_current_user()
-        answer.content = self.request.get('content')
+        else:
+            answer = Answer(parent=question_key)
+            answer.author = users.get_current_user()
+            answer.content = self.request.get('content')
         # answer.up=0
         # answer.down=0
 
