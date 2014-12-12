@@ -90,7 +90,7 @@ class listAnswer(webapp2.RequestHandler):
         question_id = self.request.get('question_id')
         question_key = ndb.Key('Question', int(question_id))
         question=question_key.get()
-        answers=Answer.query(ancestor=question_key).order(-Answer.date).fetch()
+        answers=Answer.query(ancestor=question_key).order(-Answer.margin).fetch()
         template_values = {
             'question': question,
             'answers': answers,
@@ -114,8 +114,8 @@ class AddAnswer(webapp2.RequestHandler):
         answer = Answer(parent=question_key)
         answer.author = users.get_current_user()
         answer.content = self.request.get('content')
-        answer.up=0
-        answer.down=0
+        # answer.up=0
+        # answer.down=0
 
         answer.put()
         time.sleep(0.1)
@@ -127,8 +127,13 @@ class AddAnswer(webapp2.RequestHandler):
         self.redirect('/')
 
 class Vote(webapp2.RequestHandler):
+    def goToQuestionPage(self,question_id):
+        query_params = {'question_id': question_id}
+        self.redirect('/answer?' + urllib.urlencode(query_params))
+
     def post(self):
-        if not users.get_current_user():
+        current_user = users.get_current_user()
+        if not current_user:
            url = users.create_login_url(self.request.uri)
            self.redirect(url)
            return
@@ -140,15 +145,27 @@ class Vote(webapp2.RequestHandler):
         vote = self.request.get('name')
         #update answer
         answer=answer_key.get()
+        # if vote=="up":
+        #     answer.up+=1 
+        # else:
+        #     answer.down+=1
+
+        user_id=current_user.user_id()
         if vote=="up":
-            answer.up+=1
-        else:
-            answer.down+=1
+            if (user_id not in answer.upList):
+                answer.upList.append(user_id)
+            else:
+                self.goToQuestionPage(question_id)
+        if vote=="down":
+            if (user_id not in answer.downList):
+                answer.downList.append(user_id)
+            else:
+                self.goToQuestionPage(question_id)
+
         answer.put()
         time.sleep(0.1)
-        
-        query_params = {'question_id': question_id}
-        self.redirect('/answer?' + urllib.urlencode(query_params))
+        self.goToQuestionPage(question_id)
+
 
     def get(self):
         self.redirect('/')

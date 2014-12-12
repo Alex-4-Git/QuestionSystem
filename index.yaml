@@ -16,6 +16,29 @@ indexes:
   - name: date
     direction: desc
 
+- kind: Answer
+  ancestor: yes
+  properties:
+  - name: down
+    direction: desc
+
+- kind: Answer
+  ancestor: yes
+  properties:
+  - name: margin
+
+- kind: Answer
+  ancestor: yes
+  properties:
+  - name: margin
+    direction: desc
+
+- kind: Answer
+  ancestor: yes
+  properties:
+  - name: up
+    direction: desc
+
 - kind: Greeting
   ancestor: yes
   properties:

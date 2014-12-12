@@ -24,14 +24,18 @@
             <input type=submit name="name" value="down">&nbsp;{{answer.down}}
           </div>
         </form>
+        {% if (answer.margin ==1) %}
+          <div>siyang{{ answer.margin }}siyang</div>
+        {% endif %}
         <hr>
       {% endfor %}
       
     <form action="/addA?question_id={{ id }}" method="post">
-      <div><p>Content</p><textarea name="content" rows="3" cols="60"></textarea></div>
+      <div><p>Your Answer</p><textarea name="content" rows="3" cols="60"></textarea></div>
       <div><input type="submit" value="Submmit Answer"></div>
     </form>
-
+    <br>
+    <a href="/">Go Back To Main Page</a>
 
   </body>
 </html>

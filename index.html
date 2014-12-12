@@ -7,7 +7,15 @@
   </head>
   <!-- [END head_html] -->
   <body>
-   
+    <a href="{{ url|safe }}">{{ url_linktext }}</a>
+    <br>
+    <form action="/add" method="post">
+      <div><p>I want to ask</p> <textarea name="title" rows="1" cols="60"></textarea></div>
+      <div><p>Content</p><textarea name="content" rows="3" cols="60"></textarea></div>
+      <div><input type="submit" value="Submmit Question"></div>
+    </form>
+    <br>
+    <br>
     {% for question in questions %}
       {% set id= question.key.id() %}
       {% if question.author %}
@@ -22,15 +30,7 @@
       <hr>
     {% endfor %}
       
-    <form action="/add" method="post">
-      <div><p>Title &nbsp;&nbsp;&nbsp;&nbsp;<textarea name="title" rows="1" cols="60"></textarea></p></div>
-      <div>Content<textarea name="content" rows="3" cols="60"></textarea></div>
-      <div><input type="submit" value="Submmit Question"></div>
-    </form>
-
-   
-
-    <a href="{{ url|safe }}">{{ url_linktext }}</a>
+    
 
   </body>
 </html>
