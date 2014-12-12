@@ -11,22 +11,26 @@
     <div>
       <p><b>Question Content: </b></p>
       <p>{{question.content}}</p>
+      <form action="/vote?question_id={{ id }}" method="post">
+          <div>
+            <input type=submit name="name" value="up">&nbsp;{{question.up}}&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type=submit name="name" value="down">&nbsp;{{question.down}}
+          </div>
+        </form>
+  
     </div>
     <hr>
 
       {% for answer in answers %}
         <b>{{ answer.author.nickname() }}</b> answered:
         <p>{{answer.content}}</p>
-  
+        
         <form action="/vote?question_id={{ id }}&answer_id={{ answer.key.id() }}" method="post">
           <div>
             <input type=submit name="name" value="up">&nbsp;{{answer.up}}&nbsp;&nbsp;&nbsp;&nbsp;
             <input type=submit name="name" value="down">&nbsp;{{answer.down}}
           </div>
         </form>
-        {% if (answer.margin ==1) %}
-          <div>siyang{{ answer.margin }}siyang</div>
-        {% endif %}
         <hr>
       {% endfor %}
       

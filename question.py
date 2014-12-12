@@ -41,7 +41,7 @@ class MainPage(webapp2.RequestHandler):
         else:
             url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
-        question_query=Question.query().order(-Question.date)
+        question_query=Question.query().order(-Question.margin)
         questions = question_query.fetch()
 
         template_values = {
@@ -131,44 +131,58 @@ class Vote(webapp2.RequestHandler):
         query_params = {'question_id': question_id}
         self.redirect('/answer?' + urllib.urlencode(query_params))
 
+    def updateVote(self,vote,QorA,question_id,user_id):
+        if vote=="up":
+            if (user_id not in QorA.upList):
+                QorA.upList.append(user_id)
+            else:
+                self.goToQuestionPage(question_id)
+        if vote=="down":
+            if (user_id not in QorA.downList):
+                QorA.downList.append(user_id)
+            else:
+                self.goToQuestionPage(question_id)
+
+        QorA.put()
+        time.sleep(0.1)
+        self.goToQuestionPage(question_id)
+
+
     def post(self):
         current_user = users.get_current_user()
         if not current_user:
            url = users.create_login_url(self.request.uri)
            self.redirect(url)
            return
-
-        question_id=self.request.get('question_id')
-        # question_key = ndb.Key('Question', int(question_id))
-        answer_id=self.request.get('answer_id')
-        answer_key = ndb.Key(Question, int(question_id), Answer, int(answer_id))
-        vote = self.request.get('name')
-        #update answer
-        answer=answer_key.get()
-        # if vote=="up":
-        #     answer.up+=1 
-        # else:
-        #     answer.down+=1
-
         user_id=current_user.user_id()
-        if vote=="up":
-            if (user_id not in answer.upList):
-                answer.upList.append(user_id)
-            else:
-                self.goToQuestionPage(question_id)
-        if vote=="down":
-            if (user_id not in answer.downList):
-                answer.downList.append(user_id)
-            else:
-                self.goToQuestionPage(question_id)
-
-        answer.put()
-        time.sleep(0.1)
-        self.goToQuestionPage(question_id)
-
+        question_id=self.request.get('question_id')
+        question_key=ndb.Key(Question,int(question_id))
+        question=question_key.get()
+        vote = self.request.get('name')
+        answer_id=self.request.get('answer_id')
+        
+        #update question vote
+        if not answer_id:
+            self.updateVote(vote,question,question_id,user_id)
+        #update answer vote 
+        if answer_id:
+            answer_key = ndb.Key(Question, int(question_id), Answer, int(answer_id))
+            answer=answer_key.get()
+            self.updateVote(vote,answer,question_id,user_id)
 
     def get(self):
         self.redirect('/')
+
+class WWarning(webapp2.RequestHandler):
+    def post(self):
+        question_id=self.request.get("question_id")
+        template_values = {
+            'question_id': question_id
+        }
+        template = JINJA_ENVIRONMENT.get_template('warning.html')
+        self.response.write(template.render(template_values))
+
+
 
 
 application = webapp2.WSGIApplication([
@@ -176,5 +190,6 @@ application = webapp2.WSGIApplication([
     ('/add', AddQuestion),
     ('/answer',listAnswer),
     ('/addA', AddAnswer),
-    ('/vote', Vote)
+    ('/vote', Vote),
+    ('/warning',WWarning)
 ], debug=True)

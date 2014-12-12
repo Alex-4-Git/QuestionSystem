@@ -15,17 +15,24 @@
       <div><input type="submit" value="Submmit Question"></div>
     </form>
     <br>
+    <hr>
     <br>
     {% for question in questions %}
       {% set id= question.key.id() %}
       {% if question.author %}
-        <b>{{ question.author.nickname() }}</b> ask:
+        <p><b>{{ question.author.nickname() }}</b> ask:</p>
       {% else %}
         An anonymous person wrote:
       {% endif %}
-      <p>question_id = {{ id }}</p>
-      
+
       <a href="answer?question_id={{ id }}">{{question.title}}</a>
+      
+      <form action="/warning?question_id={{id}}" method=post>
+        <div>
+            <input type=submit name="name" value="up">&nbsp;{{question.up}}&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type=submit name="name" value="down">&nbsp;{{question.down}}
+        </div>
+      </form>
       <br>
       <hr>
     {% endfor %}
