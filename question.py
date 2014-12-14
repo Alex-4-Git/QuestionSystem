@@ -7,6 +7,8 @@ from Model import *
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from google.appengine.datastore.datastore_query import Cursor
+from sets import Set
+# from jinja2.filters import *
 
 import jinja2
 import webapp2
@@ -23,13 +25,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 # entity group. Queries across the single entity group will be consistent.
 # However, the write rate should be limited to ~1/second.
 
-def get_current_date():
-    import datetime
-    return datetime.date.today().strftime("%d.%m.%Y")
-
-def question_key(question_name,author,date):
-    """Constructs a Datastore key for a answer entity with quesiton_name."""
-    return ndb.Key('Question',question_name,'Author',author,'Date',date)
 
 
 class MainPage(webapp2.RequestHandler):
@@ -42,26 +37,16 @@ class MainPage(webapp2.RequestHandler):
             url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
         #every page display 2 quesions
-        pagesize=2
+        pagesize=5
         curs=Cursor(urlsafe=self.request.get('cursor'))
-        if curs:
-            questions,next_curs,more = Question.query().order(-Question.margin).fetch_page(pagesize,start_cursor=curs)
-        else:
-            questions,next_curs,more = Question.query().order(-Question.margin).fetch_page(pagesize)
-        if more and next_curs:
-            next_page_url="/?cursor=%s"%next_curs.urlsafe()
-        else: next_page_url=""
-
-        # question_query=Question.query().order(-Question.margin)
-
-        # questions = question_query.fetch()
+        questions,next_page_url = show_page(curs,pagesize)
 
         template_values = {
             'current_user':users.get_current_user(),
             'questions': questions,
             'url': url,
             'url_linktext': url_linktext,
-            'next_page_url':next_page_url
+            'next_page_url':next_page_url,
         }
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -89,6 +74,8 @@ class AddQuestion(webapp2.RequestHandler):
             question.author = users.get_current_user()
             question.content = self.request.get('content')
             question.title = self.request.get('title')
+            if self.request.get('tag'):
+                question.tags = strip_tags(self.request.get('tag'))
             question.put()
 
         time.sleep(0.1)
@@ -109,8 +96,14 @@ class listAnswer(webapp2.RequestHandler):
         question_id = self.request.get('question_id')
         question_key = ndb.Key('Question', int(question_id))
         question=question_key.get()
-        answers=Answer.query(ancestor=question_key).order(-Answer.margin).fetch()
+        #answers=Answer.query(ancestor=question_key).order(-Answer.margin).fetch()
+
+        pagesize=4
+        curs=Cursor(urlsafe=self.request.get('cursor'))
+        answers,next_page_url = show_answer_page(curs,pagesize,question_key,question_id)
+
         template_values = {
+            'next_page_url':next_page_url,
             'question': question,
             'answers': answers,
             'current_user':users.get_current_user()
@@ -210,6 +203,33 @@ class WWarning(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('warning.html')
         self.response.write(template.render(template_values))
 
+class TagHandler(webapp2.RequestHandler):
+    def get(self):
+        if users.get_current_user():
+            url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        #every page display 2 quesions
+        pagesize=5
+        tag=self.request.get('tag')
+        curs=Cursor(urlsafe=self.request.get('cursor'))
+        questions,next_page_url = show_tag_page(curs,pagesize,tag)
+
+        template_values = {
+            'current_user':users.get_current_user(),
+            'questions': questions,
+            'url': url,
+            'url_linktext': url_linktext,
+            'next_page_url':next_page_url,
+            # 'tags':tags
+        }
+
+        template = JINJA_ENVIRONMENT.get_template('tag.html')
+        self.response.write(template.render(template_values))
+
 
 
 
@@ -219,5 +239,6 @@ application = webapp2.WSGIApplication([
     ('/answer',listAnswer),
     ('/addA', AddAnswer),
     ('/vote', Vote),
-    ('/warning',WWarning)
+    ('/warning',WWarning),
+    ('/tag',TagHandler)
 ], debug=True)

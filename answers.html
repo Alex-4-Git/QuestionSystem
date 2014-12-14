@@ -8,8 +8,10 @@
   <!-- [END head_html] -->
   <body>
     {% set id= question.key.id() %}
+    {% if current_user %}
     <div> <p>Hello {{current_user.nickname()}}</p> </div>
     <br>
+    {% endif %}
     <div>
       <p><b>{{question.title}}: </b></p>
       <p>{{question.content}}</p>
@@ -53,6 +55,9 @@
         </form>
         <hr>
       {% endfor %}
+    {% if next_page_url %}
+      <a href="{{next_page_url}}"> Next Page</a>
+    {% endif %}
       
     <form action="/addA?question_id={{ id }}" method="post">
       <div><p>Your Answer</p><textarea name="content" required rows="3" cols="60"></textarea></div>

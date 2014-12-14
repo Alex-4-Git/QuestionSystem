@@ -44,3 +44,9 @@ indexes:
   properties:
   - name: date
     direction: desc
+
+- kind: Question
+  properties:
+  - name: tags
+  - name: margin
+    direction: desc

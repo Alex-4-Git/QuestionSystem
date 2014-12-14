@@ -13,16 +13,6 @@
     {% endif %}
     <a href="{{ url|safe }}">{{ url_linktext }}</a>
     <br>
-    <form action="/add" method="post">
-      <div><p>I want to ask</p> <textarea name="title" required rows="1" cols="60"></textarea></div>
-      <div><p>Content</p><textarea name="content" required rows="3" cols="60"></textarea></div>
-      <div><p>Give it some tags, you can separate them by comma</p>
-      <textarea name="tag" rows="1" cols="60"></textarea></div>
-      <div><input type="submit" value="Submmit Question"></div>
-    </form>
-    <br>
-    <hr>
-    <br>
     {% for question in questions %}
       {% set id= question.key.id() %}
       <p><b>{{ question.author.nickname() }}</b> ask:</p>
@@ -30,11 +20,6 @@
       {% for tag in question.tags %}
         &nbsp;  <a href="/tag?tag={{tag}}"><input type=submit value={{tag}}></a>
       {% endfor %}
-      {% set content= (question.content|truncate(30,true,'...')) %}
-      <div>
-        <p>content:</p>
-        <div><p>{{content}}</p></div>
-      </div>
       <form action="/warning?question_id={{id}}" method=post>
         <div>
             <b>up</b> &nbsp;{{question.up}}&nbsp;&nbsp;&nbsp;&nbsp;
