@@ -49,7 +49,7 @@ class MainPage(webapp2.RequestHandler):
             'next_page_url':next_page_url,
         }
 
-        template = JINJA_ENVIRONMENT.get_template('index.html')
+        template = JINJA_ENVIRONMENT.get_template('main.html')
         self.response.write(template.render(template_values))
 
 
@@ -68,6 +68,10 @@ class AddQuestion(webapp2.RequestHandler):
             question=question_key.get()
             question.content=self.request.get('content')
             question.put()
+            time.sleep(0.1)
+            query_params = {'question_id': question_id}
+            self.redirect('/answer?' + urllib.urlencode(query_params))
+            
 
         else:
             question = Question()
@@ -77,9 +81,11 @@ class AddQuestion(webapp2.RequestHandler):
             if self.request.get('tag'):
                 question.tags = strip_tags(self.request.get('tag'))
             question.put()
+            time.sleep(0.1)
+            self.redirect('/')
+            
 
-        time.sleep(0.1)
-        self.redirect('/')
+        
 
     def get(self):
         # question = Question()
@@ -133,6 +139,8 @@ class AddAnswer(webapp2.RequestHandler):
         #initiallize instance answer
         else:
             answer = Answer(parent=question_key)
+            answer.parent_id = int(question_id)
+            answer.question_title = question_key.get().title
             answer.author = users.get_current_user()
             answer.content = self.request.get('content')
         # answer.up=0
@@ -140,12 +148,12 @@ class AddAnswer(webapp2.RequestHandler):
 
         answer.put()
         time.sleep(0.1)
-        
         query_params = {'question_id': question_id}
         self.redirect('/answer?' + urllib.urlencode(query_params))
 
     def get(self):
         self.redirect('/')
+
 
 class Vote(webapp2.RequestHandler):
     def goToQuestionPage(self,question_id):

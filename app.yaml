@@ -8,8 +8,18 @@ handlers:
 - url: /stylesheets
   static_dir: stylesheets
 
+- url: /upload
+  script: image.application
+
+- url: /img.*
+  script: image.application
+
+- url: /account.*
+  script: account.application
+
 - url: /.*
   script: question.application
+
 
 libraries:
 - name: webapp2

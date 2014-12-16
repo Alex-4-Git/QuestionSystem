@@ -10,15 +10,17 @@
     {% set id= question.key.id() %}
     {% if current_user %}
     <div> <p>Hello {{current_user.nickname()}}</p> </div>
+    <a href="/account"><input type=button value="manage account"></a>
     <br>
     {% endif %}
     <div>
       <p><b>{{question.title}}: </b></p>
-      <p>{{question.content}}</p>
+      <p>{{question.content|replace_html|safe}}</p>
       {% if (current_user == question.author) %}
       <form action="/add?question_id={{id}}" method=post>
       <div>
-        <textarea name="content" required rows="3" cols="60"></textarea><br>
+        <textarea name="title" required rows="1" cols="60">{{question.title}}</textarea><br>
+        <textarea name="content" required rows="3" cols="60">{{question.content}}</textarea><br>
         <input type=submit value="Edit this question">
       </div>
       </form>
@@ -36,12 +38,12 @@
 
       {% for answer in answers %}
         <b>{{ answer.author.nickname() }}</b> answered:
-        <p>{{answer.content}}</p>
+        <p>{{answer.content|replace_html|safe}}</p>
 
         {% if (current_user == answer.author) %}
           <form action="/addA?question_id={{id}}&answer_id={{ answer.key.id() }}" method=post>
           <div>
-            <textarea name="content" required rows="3" cols="60"></textarea><br>
+            <textarea name="content" rows="3" cols="60">{{answer.content}} </textarea><br>
             <input type=submit value="Edit this answer">
           </div>
           </form>
@@ -64,6 +66,13 @@
       <div><input type="submit" value="Submmit Answer"></div>
     </form>
     <br>
+    <form action="/upload" enctype="multipart/form-data" method="post">
+
+      <h3>Image Upload:</h3>
+      <input type="file" name="img"/>
+      <br><br><input type="submit" value="upload">
+
+    </form>
     <a href="/">Go Back To Main Page</a>
 
   </body>

@@ -1,5 +1,8 @@
 
 from google.appengine.ext import ndb
+import re
+import jinja2
+# from jinja2 import Environment
 
 def strip_tags(tags): # input is a list of tags separated by comma
   tags = tags.split(',')
@@ -10,6 +13,18 @@ def strip_tags(tags): # input is a list of tags separated by comma
   tags = filter(None, tags)
   tags = list(set(tags))
   return tags
+
+def replace_html(string):
+  newstring = re.sub(r'(\http[s]?://[^\s<>"]+|www\.[^\s<>"]+)', r'<a href="\1">\1</a>', string)
+  string = re.sub(r'<a href="(\http[s]?://[^\s<>"]+|www\.[^\s<>"]+)">[^\s]+.jpg</a>', r'<img src="\1">', newstring)
+  newstring = re.sub(r'<a href="(\http[s]?://[^\s<>"]+|www\.[^\s<>"]+)">[^\s]+.png</a>', r'<img src="\1">', string)
+  string = re.sub(r'<a href="(\http[s]?://[^\s<>"]+|www\.[^\s<>"]+)">[^\s]+.gif</a>', r'<img src="\1">', newstring)
+  return string
+
+# environment.filters['replace_html'] = replace_html
+# env = Environment()
+# env.filters['replace_html'] = replace_html
+jinja2.filters.FILTERS['replace_html'] = replace_html
 
 
 def show_page(curs,pagesize):
@@ -42,6 +57,7 @@ def show_answer_page(curs,pagesize,question_key,question_id):
     else: next_page_url=""
     return entries,next_page_url
 
+
 class Question(ndb.Model):
     author = ndb.UserProperty()
     title = ndb.StringProperty(indexed=False)
@@ -70,6 +86,8 @@ class Answer(ndb.Model):
     content = ndb.StringProperty(indexed=False)
     date = ndb.DateTimeProperty(auto_now_add=True)
     edit_date=ndb.DateTimeProperty(auto_now=True)
+    parent_id=ndb.IntegerProperty()
+    question_title=ndb.StringProperty(indexed=False)
     # up = ndb.IntegerProperty()
     # down = ndb.IntegerProperty()
     up = ndb.ComputedProperty(lambda self: len(self.upList))
@@ -78,6 +96,14 @@ class Answer(ndb.Model):
     downList = ndb.StringProperty(repeated=True)
     margin = ndb.ComputedProperty(lambda self: self.up-self.down)
 
-class Tag(ndb.Model):
-    name = ndb.StringProperty()
-    questionList = ndb.IntegerProperty()
+
+class Image(ndb.Model):
+    image = ndb.BlobProperty()
+    url = ndb.StringProperty()
+    user = ndb.UserProperty()
+    date = ndb.DateTimeProperty(auto_now_add=True)
+
+    @classmethod
+    def get_author(cls, user):
+        q = Image.query(Image.user == user).order(-Image.date)
+        return q.fetch()

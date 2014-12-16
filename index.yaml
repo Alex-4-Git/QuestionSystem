@@ -11,6 +11,12 @@ indexes:
 # your application using appcfg.py.
 
 - kind: Answer
+  properties:
+  - name: author
+  - name: date
+    direction: desc
+
+- kind: Answer
   ancestor: yes
   properties:
   - name: date
@@ -42,6 +48,24 @@ indexes:
 - kind: Greeting
   ancestor: yes
   properties:
+  - name: date
+    direction: desc
+
+- kind: Image
+  properties:
+  - name: user
+  - name: date
+    direction: desc
+
+- kind: Question
+  properties:
+  - name: author
+  - name: date
+    direction: desc
+
+- kind: Question
+  properties:
+  - name: tags
   - name: date
     direction: desc
 
