@@ -35,7 +35,6 @@
         <div>
             <b>up</b> &nbsp;{{question.up}}&nbsp;&nbsp;&nbsp;&nbsp;
             <b>down</b>&nbsp;{{question.down}}&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="/rss?question_id={{id}}"><input type=button value="RSS"></a>&nbsp;&nbsp;&nbsp;&nbsp;
             asked by <b>{{ question.author.nickname() }}</b> on {{question.date.strftime('%d-%m-%Y/%H:%M')}}
         </div>
         <div>

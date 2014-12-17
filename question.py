@@ -252,20 +252,20 @@ class TagHandler(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 
-class RSSHandler(webapp2.RequestHandler):
-    def get(self):
-        question_id=self.request.get("question_id")
-        question_key = ndb.Key(Question,int(question_id))
-        question = question_key.get()
+# class RSSHandler(webapp2.RequestHandler):
+#     def get(self):
+#         question_id=self.request.get("question_id")
+#         question_key = ndb.Key(Question,int(question_id))
+#         question = question_key.get()
 
-        answers = Answer.query(ancestor=question_key).order(-Answer.margin).fetch()
-        template_value = {
-            'question' : question,
-            'answers' : answers,
-        }
-        self.response.headers['Content-Type'] = 'text/xml'
-        template = JINJA_ENVIRONMENT.get_template('rss.xml')
-        self.response.write(template.render(template_value))
+#         answers = Answer.query(ancestor=question_key).order(-Answer.margin).fetch()
+#         template_value = {
+#             'question' : question,
+#             'answers' : answers,
+#         }
+#         self.response.headers['Content-Type'] = 'text/xml'
+#         template = JINJA_ENVIRONMENT.get_template('rss.xml')
+#         self.response.write(template.render(template_value))
 
 
 application = webapp2.WSGIApplication([
