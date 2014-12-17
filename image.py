@@ -23,8 +23,16 @@ class ImageHandler(webapp2.RequestHandler):
 class Uploader(webapp2.RequestHandler):
     def get(self):
 	# # header(self)
-	display = JINJA_ENVIRONMENT.get_template('upload.html')
-	self.response.write(display.render())
+	url,url_linktext = get_login_URL(self)
+	template_values = {
+		'current_user':users.get_current_user(),
+		'url': url,
+		'url_linktext': url_linktext,
+	}
+	template = JINJA_ENVIRONMENT.get_template('upload.html')
+	self.response.write(template.render(template_values))
+
+	
 	# footer(self)
     def post(self):
 	# header(self)

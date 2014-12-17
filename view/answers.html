@@ -1,0 +1,56 @@
+{% extends "header.html" %}
+<!DOCTYPE html>
+{% block title %}View Question{% endblock %}
+{% block content %}
+    
+
+    <br>
+    <font size="5">
+    <h2><p class="bg-primary">QUESTION HERE:</p><h2>
+    <p>{{question.title}}:</p>
+    {% for tag in question.tags %}
+      <a href="/tag?tag={{tag}}"><input type=submit value={{tag}}></a>
+    {% endfor %}
+    <p>{{question.content|replace_html|safe}}</p>
+    <br>
+    <form action="/vote?question_id={{ question.key.id() }}" method="post">
+      <div>
+        <input type=submit name="name" value="up">&nbsp;{{question.up}}&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type=submit name="name" value="down">&nbsp;{{question.down}}&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="/rss?question_id={{question.key.id()}}"><input type=button value="RSS"></a>&nbsp;&nbsp;&nbsp;&nbsp;
+        asked by <b>{{ question.author.nickname() }}</b> on {{question.date.strftime('%d-%m-%Y/%H:%M')}}
+      </div>
+    </form>
+  </font>
+
+    <hr>
+      <h2><p class="bg-primary">ANSWERS HERE:</p><h2>
+      {% for answer in answers %}
+        
+        <p>{{answer.content|replace_html|safe}}</p>
+        
+        <form action="/vote?question_id={{ question.key.id() }}&answer_id={{ answer.key.id() }}" method="post">
+          <div>
+            <input type=submit name="name" value="up">&nbsp;{{answer.up}}&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type=submit name="name" value="down">&nbsp;{{answer.down}}
+          </div>
+        </form>
+        <p>answered by <b>{{ answer.author.nickname() }}</b> on {{answer.date.strftime('%d-%m-%Y/%H:%M')}}</p>
+        <hr>
+      {% endfor %}
+    {% if next_page_url %}
+      <a href="{{next_page_url}}"> Next Page</a>
+    {% endif %}
+
+    
+    <br>
+    <form action="/addA?question_id={{ question.key.id() }}" method="post">
+      <div>
+        <h2><p class="bg-primary">LET ME ANSWER IT</p></h2><textarea name="content" required rows="3" cols="60"></textarea>
+      </div>
+      <br>
+      <div><input type="submit" value="Submmit Answer"></div>
+    </form>
+    <br>
+
+ {% endblock %}

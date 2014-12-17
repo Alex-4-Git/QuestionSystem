@@ -7,7 +7,7 @@ import jinja2
 def strip_tags(tags): # input is a list of tags separated by comma
   tags = tags.split(',')
   for x in range(len(tags)):
-    tags[x] = tags[x].strip()
+    tags[x] = tags[x].strip() 
     if tags[x] == '':
         tags[x] = None
   tags = filter(None, tags)
@@ -29,9 +29,9 @@ jinja2.filters.FILTERS['replace_html'] = replace_html
 
 def show_page(curs,pagesize):
     if curs:
-        entries,next_curs,more = Question.query().order(-Question.date).fetch_page(pagesize,start_cursor=curs)
+        entries,next_curs,more = Question.query().order(-Question.edit_date).fetch_page(pagesize,start_cursor=curs)
     else:
-        entries,next_curs,more = Question.query().order(-Question.date).fetch_page(pagesize)
+        entries,next_curs,more = Question.query().order(-Question.edit_date).fetch_page(pagesize)
     if more and next_curs:
          next_page_url="/?cursor=%s"%next_curs.urlsafe()
     else: next_page_url=""
@@ -39,9 +39,9 @@ def show_page(curs,pagesize):
 
 def show_tag_page(curs,pagesize,target_tag):
     if curs:
-        entries,next_curs,more = Question.query(Question.tags == target_tag).order(-Question.date).fetch_page(pagesize,start_cursor=curs)
+        entries,next_curs,more = Question.query(Question.tags == target_tag).order(-Question.edit_date).fetch_page(pagesize,start_cursor=curs)
     else:
-        entries,next_curs,more = Question.query(Question.tags == target_tag).order(-Question.date).fetch_page(pagesize)
+        entries,next_curs,more = Question.query(Question.tags == target_tag).order(-Question.edit_date).fetch_page(pagesize)
     if more and next_curs:
          next_page_url="/tag?tag=%s&cursor=%s"%(target_tag,next_curs.urlsafe())
     else: next_page_url=""

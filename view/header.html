@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <!-- [START head_html] -->
+  <head>
+    {% block head %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <!-- <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" /> -->
+    <title>{% block title %}My Page{% endblock %}</title>
+    {% endblock %}
+  </head>
+  <body class="container" >
+    <table class="table table-condensed">
+      <tr class="info">
+        <td>
+          {% if current_user %}
+          <div><h2> <p>Hello,{{current_user.nickname()}}</a></p> </h1></div>
+          {% else %}
+          <div> <h2><p> Hello,Guest</p></h1></div>
+          {% endif %}
+        </td>
+        <td>
+          <div><h1><a href="/account">Manage Account</a></h1></div>
+        </td>
+        <td>
+          <a href="{{ url|safe }}"><h1>{{ url_linktext }}</h1></a>
+        </td>
+      </tr>
+    </table>
+
+  	<div class="content">
+      <font size="5">
+      {% block content %}{% endblock %}
+      </font>
+    </div>
+
+
+    <div id="footer">
+      <br>
+      <br>
+        <p><a href="/"><h2>Go Back To Main Page</h2></a></p>
+        {% block footer %}
+        <p>&copy; Copyright 2014 by Alex.</p>
+        {% endblock %}
+    </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+  </body>
+ </html>
+ {% endautoescape %}

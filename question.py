@@ -14,7 +14,7 @@ import jinja2
 import webapp2
 
 JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)+ '/view/'),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
@@ -25,17 +25,32 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 # entity group. Queries across the single entity group will be consistent.
 # However, the write rate should be limited to ~1/second.
 
+def get_login_URL(self):
+    if users.get_current_user():
+        url = users.create_logout_url(self.request.uri)
+        url_linktext = 'Logout'
+    else:
+        url = users.create_login_url(self.request.uri)
+        url_linktext = 'Login'
+    return url,url_linktext
 
 
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
-        if users.get_current_user():
-            url = users.create_logout_url(self.request.uri)
-            url_linktext = 'Logout'
-        else:
-            url = users.create_login_url(self.request.uri)
-            url_linktext = 'Login'
+        # if users.get_current_user():
+        #     url = users.create_logout_url(self.request.uri)
+        #     url_linktext = 'Logout'
+        # else:
+        #     url = users.create_login_url(self.request.uri)
+        #     url_linktext = 'Login'
+        # template_values = {
+        #     'current_user':users.get_current_user(),
+        #     'url': url,
+        #     'url_linktext': url_linktext
+        # }
+        url,url_linktext = get_login_URL(self)
+
         #every page display 2 quesions
         pagesize=5
         curs=Cursor(urlsafe=self.request.get('cursor'))
@@ -99,6 +114,7 @@ class AddQuestion(webapp2.RequestHandler):
 class listAnswer(webapp2.RequestHandler):
 
     def get(self):
+        url,url_linktext = get_login_URL(self)
         question_id = self.request.get('question_id')
         question_key = ndb.Key('Question', int(question_id))
         question=question_key.get()
@@ -112,7 +128,9 @@ class listAnswer(webapp2.RequestHandler):
             'next_page_url':next_page_url,
             'question': question,
             'answers': answers,
-            'current_user':users.get_current_user()
+            'current_user':users.get_current_user(),
+            'url': url,
+            'url_linktext': url_linktext,
         }
 
         template = JINJA_ENVIRONMENT.get_template('answers.html')
@@ -213,12 +231,7 @@ class WWarning(webapp2.RequestHandler):
 
 class TagHandler(webapp2.RequestHandler):
     def get(self):
-        if users.get_current_user():
-            url = users.create_logout_url(self.request.uri)
-            url_linktext = 'Logout'
-        else:
-            url = users.create_login_url(self.request.uri)
-            url_linktext = 'Login'
+        url,url_linktext = get_login_URL(self)
 
         #every page display 2 quesions
         pagesize=5
@@ -232,13 +245,27 @@ class TagHandler(webapp2.RequestHandler):
             'url': url,
             'url_linktext': url_linktext,
             'next_page_url':next_page_url,
-            # 'tags':tags
+            'tag':tag
         }
 
         template = JINJA_ENVIRONMENT.get_template('tag.html')
         self.response.write(template.render(template_values))
 
 
+class RSSHandler(webapp2.RequestHandler):
+    def get(self):
+        question_id=self.request.get("question_id")
+        question_key = ndb.Key(Question,int(question_id))
+        question = question_key.get()
+
+        answers = Answer.query(ancestor=question_key).order(-Answer.margin).fetch()
+        template_value = {
+            'question' : question,
+            'answers' : answers,
+        }
+        self.response.headers['Content-Type'] = 'text/xml'
+        template = JINJA_ENVIRONMENT.get_template('rss.xml')
+        self.response.write(template.render(template_value))
 
 
 application = webapp2.WSGIApplication([
@@ -248,5 +275,6 @@ application = webapp2.WSGIApplication([
     ('/addA', AddAnswer),
     ('/vote', Vote),
     ('/warning',WWarning),
-    ('/tag',TagHandler)
+    ('/tag',TagHandler),
+    ('/rss',RSSHandler)
 ], debug=True)

@@ -72,5 +72,11 @@ indexes:
 - kind: Question
   properties:
   - name: tags
+  - name: edit_date
+    direction: desc
+
+- kind: Question
+  properties:
+  - name: tags
   - name: margin
     direction: desc

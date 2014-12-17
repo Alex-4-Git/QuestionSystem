@@ -1,4 +1,8 @@
-{% autoescape true %}
+{% extends "header.html" %}
+<!DOCTYPE html>
+{% block title %}View Question{% endblock %}
+{% block content %}
+
 <form action="/upload" enctype="multipart/form-data" method="post">
 
 <h3>Image Upload:</h3>
@@ -7,4 +11,4 @@
 
 </form>
 
-{% endautoescape %}
+ {% endblock %}

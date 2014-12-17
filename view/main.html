@@ -1,0 +1,53 @@
+{% extends "header.html" %}
+<!DOCTYPE html>
+{% block title %}Main Page{% endblock %}
+{% block content %}
+    
+    <br>
+    <form action="/add" method="post">
+      <h2><p class="bg-primary">ASK QUESTION HERE:</p><h2>
+      <div><h3><p>Title</p></h3> <textarea name="title" required rows="1" cols="70"></textarea></div>
+      <div><textarea name="content" required rows="3" cols="70"></textarea></div>
+      <div><p>Give it some tags, you can separate them by comma</p>
+      <textarea name="tag" rows="1" cols="70"></textarea></div>
+      <div><input type="submit" value="Submmit Question"></div>
+    </form>
+    <br>
+    <hr>
+    <h2><p class="bg-primary">QUESTION LIST:</p><h2>
+    {% for question in questions %}
+      {% set id= question.key.id() %}
+      <a href="answer?question_id={{ id }}">{{question.title}}</a>
+      <br>
+      {% for tag in question.tags %}
+        <a href="/tag?tag={{tag}}"><input type=submit value={{tag}}></a>
+      {% endfor %}
+      <div>
+        {% if question.content|length > 200 %}
+          {% set content= (question.content|truncate(30,true,'...')) %}
+          <div><p>{{content}}<a href="answer?question_id={{ id }}">more</a></p></div>
+        {% else %}
+          {% set content=question.content %}
+          <div><p>{{content}}</p></div>
+        {% endif %}
+      </div>
+      <form>
+        <div>
+            <b>up</b> &nbsp;{{question.up}}&nbsp;&nbsp;&nbsp;&nbsp;
+            <b>down</b>&nbsp;{{question.down}}&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="/rss?question_id={{id}}"><input type=button value="RSS"></a>&nbsp;&nbsp;&nbsp;&nbsp;
+            asked by <b>{{ question.author.nickname() }}</b> on {{question.date.strftime('%d-%m-%Y/%H:%M')}}
+        </div>
+        <div>
+          updated on {{question.edit_date.strftime('%d-%m-%Y/%H:%M')}}
+        </div>
+      </form>
+      <br>
+      <hr>
+    {% endfor %}
+    {% if next_page_url %}
+    <a href="{{next_page_url}}"> Next Page</a>
+    {% endif %}
+    <br>
+    
+{% endblock %}
